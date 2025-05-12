@@ -1,83 +1,95 @@
 <html>
-
 <head>
-    
-    <title>
-        teleport.de
-    </title>
+    <link rel="icon" href="https://imgs.search.brave.com/2PWMv6o3jeuhoeB3qdX_Ddo4cbbFP7kAl4Mw5ULD7m4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4z/Lmljb25maW5kZXIu/Y29tL2RhdGEvaWNv/bnMvbWV0YXZlcnNl/LWZpbGwtY29sb3It/ZWRpdGlvbi8xMjAv/dGVsZXBvcnRfZ2F0/ZV92aXJ0dWFsX2dh/dGUtNjQucG5n" type="image/png">
+    <title>teleport.de</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 30px;
+            color: #333;
+        }
+        .container {
+            margin-top: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+        }
+        .icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .icon:hover {
+            transform: scale(1.1);
+        }
+        .icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
 </head>
-
 <body>
-    <div align="center">
-       | Hello, this website is designed as a portal that will take you to different sites,         |<br>
-       | just click on the image and you will be teleported to this site. If you want to suggest    |<br>
-       |  something else, subscribe to the YouTube channel and write under the last short and I will|<br>
-       |   add it, here is the link                                                                 |<br>
-       |-----------------------------------------------------------------------------------------|<br>
-          <a href="https://www.youtube.com/@T9-RbSkins"> HERE
-           <br>
-    <a href="https://discord.com/">
-        <img src="Images/Discor.png" style="width:128px;">
-    </a>
-    <a href="https://web.telegram.org/a/">
-        <img src="Images/Telegram_logo.webp" style="width:128px;">
-    </a>
-    <a href="https://www.youtube.com/">
-        <img src="Images/Youtube_logo.png" style="width:128px;">
-    </a>
-    <a href="https://x.com/home">
-        <img src="Images/x-logo-rectangle-twitter-vector-50693125.webp" style="width:128px;">
-    </a>
+    <h1>My Quick Access Portal</h1>
+    <p>Click an icon to go to the site</p>
 
-    <a href="https://www.facebook.com/?locale=de_DE">
-        <img src="Images/facebook-logo_1080029-107.webp" style="width:128px;">
-    </a>
-    <a href="https://www.instagram.com/">
-        <img src="Images/Instagram.webp" style="width:128px;">
-    </a>
-    <a href="https://senkuro.com">
-        <img src="Images/Sencuro.webp" style="width:128px;">
-        <div align="under">
-        <div align="from the right">
+    <div class="container">
+        <a class="icon" href="https://discord.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968756.png" alt="Discord">
+        </a>
+        <a class="icon" href="https://telegram.org" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram">
+        </a>
+        <a class="icon" href="https://youtube.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube">
+        </a>
+        <a class="icon" href="https://x.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968853.png" alt="X (Twitter)">
+        </a>
+        <a class="icon" href="https://facebook.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png" alt="Facebook">
+        </a>
+        <a class="icon" href="https://instagram.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
+        </a>
+        <a class="icon" href="https://whatsapp.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+        </a>
 
-    </a>
-    <a href="https://www.capcut.com/editor/76B319E2-4382-4692-B15E-18CF4770F82B?
-    enter_from=picture_Online-Video-Editor%3A+Kostenlos+beeindruckende+Videos+gestal
-    ten&position=Online-Video-Editor%3A+Kostenlos+beeindruckende+Videos
-    +gestalten&article_title=Online+Video+Editor&article_type=tools&__action_from=picture_Online
-    -Video-Editor%3A+Kostenlos+beeindruckende+Videos+gestalten&from_page=article_page&scenario
-    =custom&workspaceId=7472856436691927101&spaceId=7472855793457726465">
-        <img src="Images/cap123-01.webp" style="width:128px;">
-    </a>
-    <a href="https://translate.google.com/?hl=de&sl=de&tl=ru&op=translate">
-        <img src="Images/language_trans.webp" style="width:128px;">
-    </a>
-    <a href="https://web.whatsapp.com/">
-        <img src="Images/Watsap.webp" style="width:128px;"> 
+        <!-- Перенос на новую строку -->
+        <div style="flex-basis: 100%; height: 0;"></div>
+
+        <a class="icon" href="https://senkuro.com/" target="_blank">
+            <img src="https://imgs.search.brave.com/8rV5AF3_oQbCE9gHOnrOhNyj5PissL-BitADYTLzE5o/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuYm9vc3R5LnRv/L3VzZXIvNTAzMzY5/L2F2YXRhcj9jaGFu/Z2VfdGltZT0xNzMz/NjY3NzA0" alt="Senkuro">
         </a>
-    <hr>
-    <h1>Browsers</h1><div align="center">
-    <a href="https://www.startpage.com/">
-        <img src="Images/220px-Startpage_logo_(2021).svg.webp" style="width:128px;"> 
+        <a class="icon" href="https://www.deepl.com/ru/translator" target="_blank">
+            <img src="https://www.deepl.com/img/logo/deepl-logo-blue.svg" alt="deepl">
         </a>
-        <a href="https://searx.be/search">
-            <img src="Images/searx.webp" style="width:128px;"> 
-            </a>
-            <a href="https://duckduckgo.com/?kad=de_DE">
-                <img src="Images/dug.webp" style="width:128px;"> 
-                </a>
-                <a href="https://www.qwant.com/?l=de">
-                    <img src="Images/qwant.webp" style="width:128px;"> 
-                    </a>
-                   
-                <hr>
-            <h1>colektion card</h1><div align="center">
-                <a href="https://www.cardmarket.com/de/Pokemon">
-                    <img src="Images/cardma.webp" style="width:128px;"> 
-                    </a>
-                    <a href="https://130point.com/sales/">
-                        <img src="Images/130Point-Logo-1a_White-300x167.png" style="width:128px;"> 
-                        </a>
+        <a class="icon" href="https://duckduckgo.com/?kad=de_DE" target="_blank">
+            <img src="https://imgs.search.brave.com/xoiGwzNDZs82chJUtVF9QGOkwc5aqdpPihmucVfWonA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/aS1tYWRlLWEtdGhl/LWR1Y2tkdWNrZ28t/bG9nby1pbnNwaXJl/ZC1ieS10aGUtb2xk/LWFwcGxlLWxvZ29z/LXYwLWU4cXU4enR5/dWFyZTEuanBlZz93/aWR0aD02NDAmY3Jv/cD1zbWFydCZhdXRv/PXdlYnAmcz01NTc4/ZTQ4YzYwMjZiMDRh/NWU0YzM5MDFlYjQ1/OTBhZmJkMTgxY2Fi" alt=""
+        </a>
+        <a class="icon" href="https://music.youtube.com/" target="_blank">
+            <img src="https://imgs.search.brave.com/TNBInOdv4Fj0Zmyio9ZDjdhyM-Cstf-_PmUp6ILYids/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9wbGF5/LWxoLmdvb2dsZXVz/ZXJjb250ZW50LmNv/bS96RDhVQTVDUmRp/UHpidlR3R0t0elI0/S2pRcHhxRUs2WDB0/R0RwekVhT28weFBF/dkc2SFVpQ18wcWtw/VGZ6cHVNVHFV" alt="deepl">
+        </a>
+    </div>
+
+    <footer>
+        Made with HTML & CSS | Customize as you like
+    </footer>
 </body>
-
 </html>
