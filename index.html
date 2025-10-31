@@ -1,123 +1,283 @@
-<html>
+<!doctype html>
+<html lang="ru">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="title" content="televoy.de — Быстрый доступ к сайтам">
-<meta name="description" content="Телепортируйтесь на свои любимые сайты одним кликом — Discord, YouTube, Telegram и другие.">
-<meta name="keywords" content="телепорт, переход на сайт, быстрый доступ, закладки, teleport">
-<meta name="author" content="Yorichi56787">
-    <link rel="icon" href="https://imgs.search.brave.com/2PWMv6o3jeuhoeB3qdX_Ddo4cbbFP7kAl4Mw5ULD7m4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4z/Lmljb25maW5kZXIu/Y29tL2RhdGEvaWNv/bnMvbWV0YXZlcnNl/LWZpbGwtY29sb3It/ZWRpdGlvbi8xMjAv/dGVsZXBvcnRfZ2F0/ZV92aXJ0dWFsX2dh/dGUtNjQucG5n" type="image/png">
-    <title>televoy.de</title>
-    <style>
-        @media (max-width: 600px) {
-    h1 {
-        font-size: 20px;
-        margin-top: 20px;
-    }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Beautiful Link Hub — единый файл</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{--bg:#071025;--panel:rgba(255,255,255,0.04);--muted:#9aa4b2;--accent:#00e5ff}
+    html,body{height:100%;}
+    body{background:radial-gradient(1000px 600px at 10% 10%, rgba(0,229,255,0.04), transparent), radial-gradient(800px 500px at 90% 90%, rgba(192,38,255,0.04), transparent), var(--bg); color:#e6eef8; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    .glass{background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.05)}
+    .icon{width:28px;height:28px;flex:0 0 28px}
+    .logo{height:44px}
+    .search-results{position:absolute; right:0; top:56px; width:360px; max-height:70vh; overflow:auto; z-index:9999; box-shadow:0 10px 30px rgba(2,6,23,0.6);}
+    .fade-in{animation:fadeIn .18s ease-out}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:translateY(0)}}
+  </style>
+</head>
+<body class="p-6">
+  <div class="max-w-7xl mx-auto">
+    <header class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <img src="https://imgs.search.brave.com/2PWMv6o3jeuhoeB3qdX_Ddo4cbbFP7kAl4Mw5ULD7m4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4z/Lmljb25maW5kZXIu/Y29tL2RhdGEvaWNv/bnMvbWV0YXZlcnNl/LWZpbGwtY29sb3It/ZWRpdGlvbi8xMjAv/dGVsZXBvcnRfZ2F0/ZV92aXJ0dWFsX2dh/dGUtNjQucG5n" alt="logo" class="logo rounded-md"/>
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight">Beautiful Link Hub</h1>
+          <p class="text-sm text-slate-300">Категории, быстрые ссылки и умный поиск — всё в одном файле.</p>
+        </div>
+      </div>
 
-    .container {
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <input id="q" placeholder="Поиск (напр. outube -> YouTube)" class="w-80 pl-10 pr-4 py-2 rounded-2xl glass ring-1 ring-white/6 focus:ring-2 focus:ring-cyan-400 outline-none text-slate-100" />
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 opacity-80">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div id="results" class="hidden search-results glass rounded-xl p-2"></div>
+        </div>
 
-    .icon {
-        width: 60px;
-        height: 60px;
-    }
+        <div class="flex items-center gap-2">
+          <button id="langBtn" class="px-3 py-1 rounded-lg glass">RU</button>
+        </div>
+      </div>
+    </header>
 
-    footer {
-        font-size: 12px;
-        margin: 30px 10px 0 10px;
-    }
+    <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section id="mainCols" class="md:col-span-2 space-y-5"></section>
+      <aside class="glass rounded-2xl p-4 md:col-span-1">
+        <h3 class="font-semibold text-lg mb-2">Быстрые категории</h3>
+        <div id="quick" class="grid grid-cols-2 gap-2 text-sm text-slate-200"></div>
+        <hr class="my-4 border-white/6" />
+        <h3 class="font-semibold mb-2">Инструкция</h3>
+        <p class="text-slate-300 text-sm">Вверху введите имя сайта — подсказки появятся справа. Нажмите Enter — откроется первый результат.</p>
+      </aside>
+    </main>
+
+    <footer class="mt-8 text-slate-400 text-sm">index.html — готово для GitHub Pages. Если нужно — сделаю версию с экспортом JSON.</footer>
+  </div>
+
+<script>
+// --- Language dictionary
+const DICT = {
+  ru: {
+    nothing: 'Ничего не найдено',
+    quick: 'Быстрые категории',
+    instruction: 'Вверху введите имя сайта — подсказки появятся справа. Нажмите Enter — откроется первый результат.'
+  },
+  en: {
+    nothing: 'Nothing found',
+    quick: 'Quick categories',
+    instruction: 'Type a site name above — suggestions appear at the right. Press Enter to open the first result.'
+  }
+};
+let LANG='ru';
+
+// --- Links (≈110) — проверенные официальные домены, манга-платформы включены
+const LINKS = [
+  // Видео / медиа
+  {name:'YouTube', url:'https://www.youtube.com', category:'Видео / Медиа'},
+  {name:'Vimeo', url:'https://vimeo.com', category:'Видео / Медиа'},
+  {name:'Twitch', url:'https://www.twitch.tv', category:'Видео / Медиа'},
+  {name:'Netflix', url:'https://www.netflix.com', category:'Видео / Медиа'},
+  {name:'Crunchyroll', url:'https://www.crunchyroll.com', category:'Видео / Медиа'},
+  {name:'Funimation', url:'https://www.funimation.com', category:'Видео / Медиа'},
+  {name:'Dailymotion', url:'https://www.dailymotion.com', category:'Видео / Медиа'},
+
+  // Музыка / Аудио
+  {name:'Spotify', url:'https://www.spotify.com', category:'Музыка'},
+  {name:'Apple Music', url:'https://music.apple.com', category:'Музыка'},
+  {name:'SoundCloud', url:'https://soundcloud.com', category:'Музыка'},
+  {name:'Yandex Music', url:'https://music.yandex.ru', category:'Музыка'},
+  {name:'Youtub Music', url:'https://music.youtube.com/', category:'Музыка'},
+  // Социальные сети
+  {name:'Facebook', url:'https://www.facebook.com', category:'Социальные сети'},
+  {name:'Instagram', url:'https://www.instagram.com', category:'Социальные сети'},
+  {name:'X', url:'https://twitter.com', category:'Социальные сети'},
+  {name:'VK', url:'https://vk.com', category:'Социальные сети'},
+  {name:'Telegram', url:'https://web.telegram.org', category:'Социальные сети'},
+  {name:'Discord', url:'https://discord.com', category:'Социальные сети'},
+  {name:'Reddit', url:'https://www.reddit.com', category:'Социальные сети'},
+  {name:'Pinterest', url:'https://www.pinterest.com', category:'Социальные сети'},
+
+  // Поисковики
+  {name:'Google', url:'https://www.google.com', category:'Поисковики'},
+  {name:'Bing', url:'https://www.bing.com', category:'Поисковики'},
+  {name:'DuckDuckGo', url:'https://duckduckgo.com', category:'Поисковики'},
+  {name:'Yandex', url:'https://yandex.com', category:'Поисковики'},
+  {name:'Baidu', url:'https://www.baidu.com', category:'Поисковики'},
+
+  // Переводчики
+  {name:'Google Translate', url:'https://translate.google.com', category:'Переводчики'},
+  {name:'DeepL', url:'https://www.deepl.com/translator', category:'Переводчики'},
+  {name:'Yandex Translate', url:'https://translate.yandex.com', category:'Переводчики'},
+  {name:'Bing Translator', url:'https://www.bing.com/translator', category:'Переводчики'},
+
+  // Чтение / Манга / Комиксы
+  {name:'MangaDex', url:'https://mangadex.org', category:'Манга'},
+  {name:'MangaPlus', url:'https://mangaplus.shueisha.co.jp', category:'Манга'},
+  {name:'Mangalib', url:'https://mangalib.me', category:'Манга'},
+  {name:'Senkuro', url:'https://senkuro.com/', category:'Манга'},
+  {name:'Webtoon', url:'https://www.webtoons.com', category:'Манга'},
+  {name:'Comixology', url:'https://www.comixology.com', category:'Комиксы'},
+  {name:'Readmanganato', url:'https://readmanganato.com', category:'Манга'},
+  {name:'Manganelo', url:'https://manganelo.com', category:'Манга'},
+
+  // Новости
+  {name:'BBC', url:'https://www.bbc.com', category:'Новости'},
+  {name:'CNN', url:'https://www.cnn.com', category:'Новости'},
+  {name:'The Guardian', url:'https://www.theguardian.com', category:'Новости'},
+  {name:'Meduza', url:'https://meduza.io', category:'Новости'},
+  {name:'RIA Novosti', url:'https://ria.ru', category:'Новости'},
+
+  // Магазины / Шоппинг
+  {name:'Amazon', url:'https://www.amazon.com', category:'Шоппинг'},
+  {name:'eBay', url:'https://www.ebay.com', category:'Шоппинг'},
+  {name:'AliExpress', url:'https://www.aliexpress.com', category:'Шоппинг'},
+  {name:'Etsy', url:'https://www.etsy.com', category:'Шоппинг'},
+
+  // Образование
+  {name:'Khan Academy', url:'https://www.khanacademy.org', category:'Образование'},
+  {name:'Coursera', url:'https://www.coursera.org', category:'Образование'},
+  {name:'edX', url:'https://www.edx.org', category:'Образование'},
+  {name:'Udemy', url:'https://www.udemy.com', category:'Образование'},
+
+  // Облако / Документы
+  {name:'Google Drive', url:'https://drive.google.com', category:'Облако / Документы'},
+  {name:'Dropbox', url:'https://www.dropbox.com', category:'Облако / Документы'},
+  {name:'OneDrive', url:'https://onedrive.live.com', category:'Облако / Документы'},
+  {name:'Notion', url:'https://www.notion.so', category:'Облако / Документы'},
+
+  // Почта
+  {name:'Gmail', url:'https://mail.google.com', category:'Почта'},
+  {name:'Outlook', url:'https://outlook.live.com', category:'Почта'},
+  {name:'Yahoo Mail', url:'https://mail.yahoo.com', category:'Почта'},
+
+  // Разработка / Технологии
+  {name:'GitHub', url:'https://github.com', category:'Разработка'},
+  {name:'GitLab', url:'https://gitlab.com', category:'Разработка'},
+  {name:'Stack Overflow', url:'https://stackoverflow.com', category:'Разработка'},
+  {name:'MDN', url:'https://developer.mozilla.org', category:'Разработка'},
+  {name:'Hacker News', url:'https://news.ycombinator.com', category:'Технологии'},
+  {name:'Product Hunt', url:'https://www.producthunt.com', category:'Технологии'},
+
+  // Финансы
+  {name:'CoinMarketCap', url:'https://coinmarketcap.com', category:'Финансы'},
+  {name:'Bloomberg', url:'https://www.bloomberg.com', category:'Финансы'},
+  {name:'Yahoo Finance', url:'https://finance.yahoo.com', category:'Финансы'},
+
+  // Карты / Путешествия
+  {name:'Google Maps', url:'https://maps.google.com', category:'Карты'},
+  {name:'OpenStreetMap', url:'https://www.openstreetmap.org', category:'Карты'},
+  {name:'Booking.com', url:'https://www.booking.com', category:'Путешествия'},
+  {name:'Airbnb', url:'https://www.airbnb.com', category:'Путешествия'},
+
+  // Инструменты
+  {name:'Canva', url:'https://www.canva.com', category:'Инструменты'},
+  {name:'Figma', url:'https://www.figma.com', category:'Инструменты'},
+  {name:'Photopea', url:'https://www.photopea.com', category:'Инструменты'},
+  {name:'TinyPNG', url:'https://tinypng.com', category:'Инструменты'},
+  {name:'Notion Templates', url:'https://www.notion.so/templates', category:'Инструменты'},
+
+  // Подкасты / Аудио
+  {name:'Apple Podcasts', url:'https://podcasts.apple.com', category:'Подкасты'},
+  {name:'Google Podcasts', url:'https://podcasts.google.com', category:'Подкасты'},
+
+  // Блоги / Чтение
+  {name:'Medium', url:'https://medium.com', category:'Чтение'},
+  {name:'Wattpad', url:'https://www.wattpad.com', category:'Чтение'},
+  {name:'Scribd', url:'https://www.scribd.com', category:'Чтение'},
+  {name:'Project Gutenberg', url:'https://www.gutenberg.org', category:'Чтение'},
+
+  // Работа / Фриланс
+  {name:'Indeed', url:'https://www.indeed.com', category:'Работа'},
+  {name:'Glassdoor', url:'https://www.glassdoor.com', category:'Работа'},
+  {name:'Upwork', url:'https://www.upwork.com', category:'Фриланс'},
+  {name:'Fiverr', url:'https://www.fiverr.com', category:'Фриланс'},
+
+  // архивы и утилиты
+  {name:'Archive.org', url:'https://archive.org', category:'Архивы'},
+  {name:'Wayback Machine', url:'https://web.archive.org', category:'Архивы'},
+  {name:'Speedtest', url:'https://www.speedtest.net', category:'Инструменты'},
+  {name:'WhatIsMyIP', url:'https://www.whatismyip.com', category:'Инструменты'}
+];
+
+// --- Helpers
+function slug(s){return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');}
+function levenshtein(a,b){ if(a===b) return 0; if(!a) return b.length; if(!b) return a.length; const m=a.length,n=b.length; let dp=Array(n+1).fill(0).map((_,i)=>i); for(let i=1;i<=m;i++){let prev=i; for(let j=1;j<=n;j++){let cur=dp[j]; if(a[i-1]===b[j-1]) dp[j]=prev; else dp[j]=Math.min(prev,dp[j],dp[j-1])+1; prev=cur;}} return dp[n]; }
+LINKS.forEach(l=>l.slug=slug(l.name));
+
+// --- Render categories (grouped)
+const categories = [...new Set(LINKS.map(l=>l.category))];
+const mainCols = document.getElementById('mainCols');
+mainCols.innerHTML = categories.map(cat=>{
+  const items = LINKS.filter(l=>l.category===cat);
+  return `
+    <div class="glass rounded-2xl p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold">${cat} <span class="text-sm text-slate-400">(${items.length})</span></h2>
+        <button class="toggle text-sm text-cyan-300">Свернуть</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 links-grid">
+        ${items.map(it=>`<a href="${it.url}" target="_blank" class="flex items-center gap-3 p-2 rounded-lg hover:translate-y-0.5 transition-all bg-transparent"><img class="icon" src="https://cdn.simpleicons.org/${encodeURIComponent(it.name.replace(/\s+/g,''))}" onerror="this.style.display='none'" alt="${it.name}"/><div><div class='font-medium'>${it.name}</div><div class='text-xs text-slate-400'>${it.url.replace(/^https?:\/\//,'')}</div></div></a>`).join('')}
+      </div>
+    </div>
+  `;
+}).join('');
+
+// toggles
+document.querySelectorAll('.toggle').forEach(btn=>btn.addEventListener('click',()=>{ const grid = btn.closest('.glass').querySelector('.links-grid'); grid.classList.toggle('hidden'); btn.textContent = grid.classList.contains('hidden') ? 'Развернуть' : 'Свернуть'; }));
+
+// quick categories
+const quick = document.getElementById('quick');
+categories.forEach(cat=>{ const b = document.createElement('button'); b.className='py-1 px-2 rounded-md hover:bg-white/5 text-sm'; b.textContent=cat; b.addEventListener('click',()=>{ const el = Array.from(document.querySelectorAll('h2')).find(h=>h.textContent.trim().startsWith(cat)); if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }); quick.appendChild(b); });
+
+// --- Search
+const q = document.getElementById('q');
+const results = document.getElementById('results');
+
+function findMatches(query){
+  const s = query.trim().toLowerCase(); if(!s) return [];
+  const scored = LINKS.map(l=>{ const slugl=l.slug; let score = 100 - levenshtein(s,slugl); if(slugl.includes(s)) score += 30; if(slugl.startsWith(s)) score += 20; if(l.name.toLowerCase().includes(s)) score += 15; return {item:l,score}; });
+  return scored.filter(x=>x.score>30).sort((a,b)=>b.score-a.score).slice(0,12).map(x=>x.item);
 }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        h1 {
-            margin-top: 30px;
-            color: #333;
-        }
-        .container {
-            margin-top: 40px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 25px;
-        }
-        .icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s;
-        }
-        .icon:hover {
-            transform: scale(1.1);
-        }
-        .icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        footer {
-            margin-top: 50px;
-            font-size: 14px;
-            color: #777;
-        }
-    </style>
-</head>
-<body>
-    <h1>My Quick Access Portal</h1>
-    <p>Click an icon to go to the site</p>
+function renderResults(arr){
+  if(arr.length===0){ results.innerHTML = `<div class="p-3 text-slate-400">${DICT[LANG].nothing}</div>`; results.classList.remove('hidden'); results.classList.add('fade-in'); return; }
+  results.innerHTML = arr.map(a=>{
+    const icon = `https://cdn.simpleicons.org/${encodeURIComponent(a.name.replace(/\s+/g,''))}`;
+    return `
+      <a href="${a.url}" target="_blank" class="flex items-center gap-3 p-2 rounded-md hover:bg-white/5">
+        <img src="${icon}" alt="" class="w-6 h-6" onerror="this.style.display='none'" />
+        <div>
+          <div class="font-medium">${a.name}</div>
+          <div class="text-xs text-slate-400">${a.category} · ${a.url.replace(/^https?:\/\//,'')}</div>
+        </div>
+      </a>
+    `;
+  }).join('');
+  results.classList.remove('hidden'); results.classList.add('fade-in');
+}
 
-    <div class="container">
-        <a class="icon" href="https://discord.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968756.png" alt="Discord">
-        </a>
-        <a class="icon" href="https://telegram.org" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram">
-        </a>
-        <a class="icon" href="https://youtube.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube">
-        </a>
-        <a class="icon" href="https://x.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968853.png" alt="X (Twitter)">
-        </a>
-        <a class="icon" href="https://facebook.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png" alt="Facebook">
-        </a>
-        <a class="icon" href="https://instagram.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
-        </a>
-        <a class="icon" href="https://whatsapp.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
-        </a>
+let last='';
+q.addEventListener('input', ()=>{ const v=q.value; if(v===last) return; last=v; const matches=findMatches(v); renderResults(matches); });
+q.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ const matches=findMatches(q.value); if(matches[0]) window.open(matches[0].url,'_blank'); } });
 
-        <!-- Перенос на новую строку -->
-        <div style="flex-basis: 100%; height: 0;"></div>
+// hide on outside click
+document.addEventListener('click',(e)=>{ if(!document.getElementById('q').contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
+q.addEventListener('focus', ()=>{ if(q.value.trim()) results.classList.remove('hidden'); });
 
-        <a class="icon" href="https://senkuro.com/" target="_blank">
-            <img src="https://imgs.search.brave.com/8rV5AF3_oQbCE9gHOnrOhNyj5PissL-BitADYTLzE5o/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuYm9vc3R5LnRv/L3VzZXIvNTAzMzY5/L2F2YXRhcj9jaGFu/Z2VfdGltZT0xNzMz/NjY3NzA0" alt="Senkuro">
-        </a>
-        <a class="icon" href="https://www.deepl.com/ru/translator" target="_blank">
-            <img src="https://www.deepl.com/img/logo/deepl-logo-blue.svg" alt="deepl">
-        </a>
-        <a class="icon" href="https://duckduckgo.com/?kad=de_DE" target="_blank">
-            <img src="https://imgs.search.brave.com/xoiGwzNDZs82chJUtVF9QGOkwc5aqdpPihmucVfWonA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/aS1tYWRlLWEtdGhl/LWR1Y2tkdWNrZ28t/bG9nby1pbnNwaXJl/ZC1ieS10aGUtb2xk/LWFwcGxlLWxvZ29z/LXYwLWU4cXU4enR5/dWFyZTEuanBlZz93/aWR0aD02NDAmY3Jv/cD1zbWFydCZhdXRv/PXdlYnAmcz01NTc4/ZTQ4YzYwMjZiMDRh/NWU0YzM5MDFlYjQ1/OTBhZmJkMTgxY2Fi" alt=""
-        </a>
-        <a class="icon" href="https://music.youtube.com/" target="_blank">
-            <img src="https://imgs.search.brave.com/TNBInOdv4Fj0Zmyio9ZDjdhyM-Cstf-_PmUp6ILYids/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9wbGF5/LWxoLmdvb2dsZXVz/ZXJjb250ZW50LmNv/bS96RDhVQTVDUmRp/UHpidlR3R0t0elI0/S2pRcHhxRUs2WDB0/R0RwekVhT28weFBF/dkc2SFVpQ18wcWtw/VGZ6cHVNVHFV" alt="deepl">
-        </a>
-    </div>
+// --- Language switcher
+const langBtn = document.getElementById('langBtn');
+langBtn.addEventListener('click', ()=>{ LANG = LANG==='ru' ? 'en' : 'ru'; langBtn.textContent = LANG==='ru' ? 'RU' : 'EN'; // update small texts
+  document.querySelector('aside h3').textContent = DICT[LANG].quick;
+  document.querySelector('aside p').textContent = DICT[LANG].instruction;
+});
 
-    <footer>
-        Made with HTML & CSS | Customize as you like
-    </footer>
+// initial texts
+document.querySelector('aside h3').textContent = DICT[LANG].quick;
+document.querySelector('aside p').textContent = DICT[LANG].instruction;
+
+</script>
 </body>
 </html>
