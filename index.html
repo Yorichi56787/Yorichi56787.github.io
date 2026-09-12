@@ -10,7 +10,7 @@
     html,body{height:100%;}
     body{background:radial-gradient(1000px 600px at 10% 10%, rgba(0,229,255,0.04), transparent), radial-gradient(800px 500px at 90% 90%, rgba(192,38,255,0.04), transparent), var(--bg); color:#e6eef8; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
     .glass{background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.05)}
-    .icon{width:28px;height:28px;flex:0 0 28px}
+    .icon{width:28px;height:28px;flex:0 0 28px; object-fit:contain;}
     .logo{height:44px}
     .search-results{position:absolute; right:0; top:56px; width:360px; max-height:70vh; overflow:auto; z-index:9999; box-shadow:0 10px 30px rgba(2,6,23,0.6);}
     .fade-in{animation:fadeIn .18s ease-out}
@@ -19,61 +19,305 @@
 </head>
 <body class="p-6">
   <div class="max-w-7xl mx-auto">
-    <header class="flex items-center justify-between mb-6">
+    <header class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
       <div class="flex items-center gap-4">
         <img src="https://imgs.search.brave.com/2PWMv6o3jeuhoeB3qdX_Ddo4cbbFP7kAl4Mw5ULD7m4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4z/Lmljb25maW5kZXIu/Y29tL2RhdGEvaWNv/bnMvbWV0YXZlcnNl/LWZpbGwtY29sb3It/ZWRpdGlvbi8xMjAv/dGVsZXBvcnRfZ2F0/ZV92aXJ0dWFsX2dh/dGUtNjQucG5n" alt="logo" class="logo rounded-md"/>
         <div>
-          <h1 class="text-2xl font-extrabold tracking-tight">Beautiful Link Hub</h1>
-          <p class="text-sm text-slate-300">Категории, быстрые ссылки и умный поиск — всё в одном файле.</p>
+          <h1 class="text-2xl font-extrabold tracking-tight" id="hdr-title">Beautiful Link Hub</h1>
+          <p class="text-sm text-slate-300" id="hdr-subtitle">Категории, быстрые ссылки и умный поиск — всё в одном файле.</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Счетчик посещений -->
+        <div class="glass px-3 py-1.5 rounded-xl text-xs text-slate-300 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span id="txt-visits">Визитов за день:</span>
+          <span id="visitCount" class="font-bold text-cyan-300">1</span>
+        </div>
+
+        <!-- Поиск -->
         <div class="relative">
-          <input id="q" placeholder="Поиск (напр. outube -> YouTube)" class="w-80 pl-10 pr-4 py-2 rounded-2xl glass ring-1 ring-white/6 focus:ring-2 focus:ring-cyan-400 outline-none text-slate-100" />
+          <input id="q" placeholder="Поиск (напр. youtube -> YouTube)" class="w-72 sm:w-80 pl-10 pr-4 py-2 rounded-2xl glass ring-1 ring-white/6 focus:ring-2 focus:ring-cyan-400 outline-none text-slate-100" />
           <div class="absolute left-3 top-1/2 -translate-y-1/2 opacity-80">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div id="results" class="hidden search-results glass rounded-xl p-2"></div>
         </div>
 
+        <!-- Выбор языка -->
         <div class="flex items-center gap-2">
-          <button id="langBtn" class="px-3 py-1 rounded-lg glass">RU</button>
+          <select id="langSelect" class="px-3 py-1 rounded-lg glass text-slate-100 outline-none cursor-pointer bg-slate-900/50">
+            <option value="ru">RU</option>
+            <option value="en">EN</option>
+            <option value="de">DE</option>
+            <option value="fr">FR</option>
+            <option value="it">IT</option>
+          </select>
         </div>
       </div>
     </header>
 
     <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <section id="mainCols" class="md:col-span-2 space-y-5"></section>
-      <aside class="glass rounded-2xl p-4 md:col-span-1">
-        <h3 class="font-semibold text-lg mb-2">Быстрые категории</h3>
-        <div id="quick" class="grid grid-cols-2 gap-2 text-sm text-slate-200"></div>
-        <hr class="my-4 border-white/6" />
-        <h3 class="font-semibold mb-2">Инструкция</h3>
-        <p class="text-slate-300 text-sm">Вверху введите имя сайта — подсказки появятся справа. Нажмите Enter — откроется первый результат.</p>
+      
+      <aside class="space-y-6 md:col-span-1">
+        <!-- Блок добавления собственного сайта -->
+        <div class="glass rounded-2xl p-4">
+          <h3 class="font-semibold text-lg mb-2" id="add-title">Добавить свой сайт</h3>
+          <p class="text-xs text-slate-400 mb-3" id="add-desc">Мини-ИИ автоматически определит категорию и загрузит логотип.</p>
+          <form id="addSiteForm" class="space-y-3">
+            <input type="url" id="siteUrl" placeholder="https://example.com" required class="w-full px-3 py-2 rounded-xl glass ring-1 ring-white/10 focus:ring-2 focus:ring-cyan-400 outline-none text-sm text-slate-100" />
+            <input type="text" id="siteName" placeholder="Название (необязательно)" class="w-full px-3 py-2 rounded-xl glass ring-1 ring-white/10 focus:ring-2 focus:ring-cyan-400 outline-none text-sm text-slate-100" />
+            
+            <button type="submit" id="addBtn" class="w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 ring-1 ring-cyan-500/40 rounded-xl text-sm font-medium transition-all">
+              Добавить сайт
+            </button>
+          </form>
+        </div>
+
+        <!-- Категории и инструкция -->
+        <div class="glass rounded-2xl p-4">
+          <h3 class="font-semibold text-lg mb-2" id="quick-title">Быстрые категории</h3>
+          <div id="quick" class="grid grid-cols-2 gap-2 text-sm text-slate-200"></div>
+          <hr class="my-4 border-white/6" />
+          <h3 class="font-semibold mb-2" id="instr-title">Инструкция</h3>
+          <p class="text-slate-300 text-sm" id="instr-desc">Нажмите на звездочку ⭐️ возле сайта, чтобы добавить его в «Быстрый выбор». ИИ автоматически распределяет новые сайты по категориям.</p>
+        </div>
       </aside>
     </main>
 
-    <footer class="mt-8 text-slate-400 text-sm">index.html — готово для GitHub Pages. Если нужно — сделаю версию с экспортом JSON.</footer>
+    <footer class="mt-8 text-slate-400 text-sm" id="footer-text">index.html — готово для GitHub Pages.</footer>
   </div>
 
 <script>
-// --- Language dictionary
+// Переводы интерфейса и категорий
 const DICT = {
   ru: {
+    title: 'Beautiful Link Hub',
+    subtitle: 'Категории, быстрые ссылки и умный поиск — всё в одном файле.',
+    searchPlaceholder: 'Поиск (напр. youtube -> YouTube)',
     nothing: 'Ничего не найдено',
     quick: 'Быстрые категории',
-    instruction: 'Вверху введите имя сайта — подсказки появятся справа. Нажмите Enter — откроется первый результат.'
+    instruction: 'Нажмите на звездочку ⭐️ возле сайта, чтобы добавить его в «Быстрый выбор». ИИ автоматически распределяет новые сайты по категориям.',
+    addTitle: 'Добавить свой сайт',
+    addDesc: 'Мини-ИИ автоматически определит категорию и загрузит логотип.',
+    urlPlaceholder: 'https://example.com',
+    namePlaceholder: 'Название (необязательно)',
+    addBtn: 'Добавить сайт',
+    visits: 'Визитов за день:',
+    collapse: 'Свернуть',
+    expand: 'Развернуть',
+    footer: 'index.html — готово для GitHub Pages.',
+    categories: {
+      'Быстрый выбор': '⭐️ Быстрый выбор',
+      'Видео / Медиа': 'Видео / Медиа',
+      'Музыка': 'Музыка',
+      'Социальные сети': 'Социальные сети',
+      'Поисковики': 'Поисковики',
+      'Переводчики': 'Переводчики',
+      'Манга': 'Манга',
+      'Комиксы': 'Комиксы',
+      'Новости': 'Новости',
+      'Шоппинг': 'Шоппинг',
+      'Образование': 'Образование',
+      'Облако / Документы': 'Облако / Документы',
+      'Почта': 'Почта',
+      'Разработка': 'Разработка',
+      'Технологии': 'Технологии',
+      'Финансы': 'Финансы',
+      'Карты': 'Карты',
+      'Путешествия': 'Путешествия',
+      'Инструменты': 'Инструменты',
+      'Подкасты': 'Подкасты',
+      'Чтение': 'Чтение',
+      'Работа': 'Работа',
+      'Фриланс': 'Фриланс',
+      'Архивы': 'Архивы',
+      'Мои сайты': 'Мои сайты'
+    }
   },
   en: {
+    title: 'Beautiful Link Hub',
+    subtitle: 'Categories, quick links, and smart search — all in one file.',
+    searchPlaceholder: 'Search (e.g. youtube -> YouTube)',
     nothing: 'Nothing found',
     quick: 'Quick categories',
-    instruction: 'Type a site name above — suggestions appear at the right. Press Enter to open the first result.'
+    instruction: 'Click the star ⭐️ next to any site to add it to Quick Selection. AI auto-detects categories.',
+    addTitle: 'Add your site',
+    addDesc: 'Mini-AI will auto-detect category and logo.',
+    urlPlaceholder: 'https://example.com',
+    namePlaceholder: 'Name (optional)',
+    addBtn: 'Add Site',
+    visits: 'Visits today:',
+    collapse: 'Collapse',
+    expand: 'Expand',
+    footer: 'index.html — ready for GitHub Pages.',
+    categories: {
+      'Быстрый выбор': '⭐️ Quick Selection',
+      'Видео / Медиа': 'Video / Media',
+      'Музыка': 'Music',
+      'Социальные сети': 'Social Networks',
+      'Поисковики': 'Search Engines',
+      'Переводчики': 'Translators',
+      'Манга': 'Manga',
+      'Комиксы': 'Comics',
+      'Новости': 'News',
+      'Шоппинг': 'Shopping',
+      'Образование': 'Education',
+      'Облако / Документы': 'Cloud / Docs',
+      'Почта': 'Mail',
+      'Разработка': 'Development',
+      'Технологии': 'Tech',
+      'Финансы': 'Finance',
+      'Карты': 'Maps',
+      'Путешествия': 'Travel',
+      'Инструменты': 'Tools',
+      'Подкасты': 'Podcasts',
+      'Чтение': 'Reading',
+      'Работа': 'Jobs',
+      'Фриланс': 'Freelance',
+      'Архивы': 'Archives',
+      'Мои сайты': 'My Custom Sites'
+    }
+  },
+  de: {
+    title: 'Beautiful Link Hub',
+    subtitle: 'Kategorien, Schnelllinks und intelligente Suche – alles in einer Datei.',
+    searchPlaceholder: 'Suche (z.B. youtube -> YouTube)',
+    nothing: 'Nichts gefunden',
+    quick: 'Schnellkategorien',
+    instruction: 'Klicken Sie auf den Stern ⭐️ neben einer Website, um sie zu den Favoriten hinzuzufügen.',
+    addTitle: 'Eigene Website hinzufügen',
+    addDesc: 'Mini-KI erkennt Kategorie und Logo automatisch.',
+    urlPlaceholder: 'https://beispiel.de',
+    namePlaceholder: 'Name (optional)',
+    addBtn: 'Website hinzufügen',
+    visits: 'Besuche heute:',
+    collapse: 'Einklappen',
+    expand: 'Ausklappen',
+    footer: 'index.html — bereit für GitHub Pages.',
+    categories: {
+      'Быстрый выбор': '⭐️ Schnellauswahl',
+      'Видео / Медиа': 'Video / Medien',
+      'Музыка': 'Musik',
+      'Социальные сети': 'Soziale Netzwerke',
+      'Поисковики': 'Suchmaschinen',
+      'Переводчики': 'Übersetzer',
+      'Манга': 'Manga',
+      'Комиксы': 'Comics',
+      'Новости': 'Nachrichten',
+      'Шоппинг': 'Shopping',
+      'Образование': 'Bildung',
+      'Облако / Документы': 'Cloud / Dokumente',
+      'Почта': 'E-Mail',
+      'Разработка': 'Entwicklung',
+      'Технологии': 'Technologie',
+      'Финансы': 'Finanzen',
+      'Карты': 'Karten',
+      'Путешествия': 'Reisen',
+      'Инструменты': 'Werkzeuge',
+      'Подкасты': 'Podcasts',
+      'Чтение': 'Lesen',
+      'Работа': 'Jobs',
+      'Фриланс': 'Freiberuflich',
+      'Архивы': 'Archive',
+      'Мои сайты': 'Meine Websites'
+    }
+  },
+  fr: {
+    title: 'Beautiful Link Hub',
+    subtitle: 'Catégories, liens rapides et recherche intelligente — tout en un fichier.',
+    searchPlaceholder: 'Rechercher (ex. youtube -> YouTube)',
+    nothing: 'Rien trouvé',
+    quick: 'Catégories rapides',
+    instruction: 'Cliquez sur l\'étoile ⭐️ à côté d\'un site pour l\'ajouter à la sélection rapide.',
+    addTitle: 'Ajouter votre site',
+    addDesc: 'Le mini-IA détectera automatiquement la catégorie et le logo.',
+    urlPlaceholder: 'https://exemple.fr',
+    namePlaceholder: 'Nom (optionnel)',
+    addBtn: 'Ajouter le site',
+    visits: 'Visites du jour:',
+    collapse: 'Réduire',
+    expand: 'Développer',
+    footer: 'index.html — prêt pour GitHub Pages.',
+    categories: {
+      'Быстрый выбор': '⭐️ Sélection rapide',
+      'Видео / Медиа': 'Vidéo / Média',
+      'Музыка': 'Musique',
+      'Социальные сети': 'Réseaux Sociaux',
+      'Поисковики': 'Moteurs de recherche',
+      'Переводчики': 'Traducteurs',
+      'Манга': 'Manga',
+      'Комиксы': 'Bandes dessinées',
+      'Новости': 'Actualités',
+      'Шоппинг': 'Achats',
+      'Образование': 'Éducation',
+      'Облако / Документы': 'Cloud / Docs',
+      'Почта': 'E-mail',
+      'Разработка': 'Développement',
+      'Технологии': 'Technologies',
+      'Финансы': 'Finances',
+      'Карты': 'Cartes',
+      'Путешествия': 'Voyages',
+      'Инструменты': 'Outils',
+      'Подкасты': 'Podcasts',
+      'Чтение': 'Lecture',
+      'Работа': 'Emploi',
+      'Фриланс': 'Indépendant',
+      'Архивы': 'Archives',
+      'Мои сайты': 'Mes sites'
+    }
+  },
+  it: {
+    title: 'Beautiful Link Hub',
+    subtitle: 'Categorie, link rapidi e ricerca intelligente — tutto in un unico file.',
+    searchPlaceholder: 'Cerca (es. youtube -> YouTube)',
+    nothing: 'Nessun risultato',
+    quick: 'Categorie rapide',
+    instruction: 'Clicca sulla stella ⭐️ accanto a un sito per aggiungerlo alla Selezione Rapida.',
+    addTitle: 'Aggiungi il tuo sito',
+    addDesc: 'La mini-IA rileverà automaticamente categoria e logo.',
+    urlPlaceholder: 'https://esempio.it',
+    namePlaceholder: 'Nome (opzionale)',
+    addBtn: 'Aggiungi sito',
+    visits: 'Visite di oggi:',
+    collapse: 'Riduci',
+    expand: 'Espandi',
+    footer: 'index.html — pronto per GitHub Pages.',
+    categories: {
+      'Быстрый выбор': '⭐️ Selezione rapida',
+      'Видео / Медиа': 'Video / Media',
+      'Музыка': 'Musica',
+      'Социальные сети': 'Social Network',
+      'Поисковики': 'Motori di ricerca',
+      'Переводчики': 'Traduttori',
+      'Манга': 'Manga',
+      'Комиксы': 'Fumetti',
+      'Новости': 'Notizie',
+      'Шоппинг': 'Shopping',
+      'Образование': 'Istruzione',
+      'Облако / Документы': 'Cloud / Documenti',
+      'Почта': 'Email',
+      'Разработка': 'Sviluppo',
+      'Технологии': 'Tecnologia',
+      'Финансы': 'Finanza',
+      'Карты': 'Mappe',
+      'Путешествия': 'Viaggi',
+      'Инструменты': 'Strumenti',
+      'Подкасты': 'Podcast',
+      'Чтение': 'Lettura',
+      'Работа': 'Lavoro',
+      'Фриланс': 'Freelance',
+      'Архивы': 'Archivi',
+      'Мои сайты': 'I miei siti'
+    }
   }
 };
-let LANG='ru';
 
-// --- Links (≈110) — проверенные официальные домены, манга-платформы включены
+let LANG = 'ru';
+
+// Базовый список ссылок (Ватсап находится в социальных сетях)
 const LINKS = [
   // Видео / медиа
   {name:'YouTube', url:'https://www.youtube.com', category:'Видео / Медиа'},
@@ -83,14 +327,14 @@ const LINKS = [
   {name:'Crunchyroll', url:'https://www.crunchyroll.com', category:'Видео / Медиа'},
   {name:'Funimation', url:'https://www.funimation.com', category:'Видео / Медиа'},
   {name:'Dailymotion', url:'https://www.dailymotion.com', category:'Видео / Медиа'},
-
-  // Музыка / Аудио
+  // Музыка
   {name:'Spotify', url:'https://www.spotify.com', category:'Музыка'},
   {name:'Apple Music', url:'https://music.apple.com', category:'Музыка'},
   {name:'SoundCloud', url:'https://soundcloud.com', category:'Музыка'},
   {name:'Yandex Music', url:'https://music.yandex.ru', category:'Музыка'},
-  {name:'Youtub Music', url:'https://music.youtube.com/', category:'Музыка'},
+  {name:'Youtube Music', url:'https://music.youtube.com/', category:'Музыка'},
   // Социальные сети
+  {name:'WhatsApp', url:'https://web.whatsapp.com', category:'Социальные сети'},
   {name:'Facebook', url:'https://www.facebook.com', category:'Социальные сети'},
   {name:'Instagram', url:'https://www.instagram.com', category:'Социальные сети'},
   {name:'X', url:'https://twitter.com', category:'Социальные сети'},
@@ -99,21 +343,18 @@ const LINKS = [
   {name:'Discord', url:'https://discord.com', category:'Социальные сети'},
   {name:'Reddit', url:'https://www.reddit.com', category:'Социальные сети'},
   {name:'Pinterest', url:'https://www.pinterest.com', category:'Социальные сети'},
-
   // Поисковики
   {name:'Google', url:'https://www.google.com', category:'Поисковики'},
   {name:'Bing', url:'https://www.bing.com', category:'Поисковики'},
   {name:'DuckDuckGo', url:'https://duckduckgo.com', category:'Поисковики'},
   {name:'Yandex', url:'https://yandex.com', category:'Поисковики'},
   {name:'Baidu', url:'https://www.baidu.com', category:'Поисковики'},
-
   // Переводчики
   {name:'Google Translate', url:'https://translate.google.com', category:'Переводчики'},
   {name:'DeepL', url:'https://www.deepl.com/translator', category:'Переводчики'},
   {name:'Yandex Translate', url:'https://translate.yandex.com', category:'Переводчики'},
   {name:'Bing Translator', url:'https://www.bing.com/translator', category:'Переводчики'},
-
-  // Чтение / Манга / Комиксы
+  // Манга
   {name:'MangaDex', url:'https://mangadex.org', category:'Манга'},
   {name:'MangaPlus', url:'https://mangaplus.shueisha.co.jp', category:'Манга'},
   {name:'Mangalib', url:'https://mangalib.me', category:'Манга'},
@@ -122,162 +363,421 @@ const LINKS = [
   {name:'Comixology', url:'https://www.comixology.com', category:'Комиксы'},
   {name:'Readmanganato', url:'https://readmanganato.com', category:'Манга'},
   {name:'Manganelo', url:'https://manganelo.com', category:'Манга'},
-
   // Новости
   {name:'BBC', url:'https://www.bbc.com', category:'Новости'},
   {name:'CNN', url:'https://www.cnn.com', category:'Новости'},
   {name:'The Guardian', url:'https://www.theguardian.com', category:'Новости'},
   {name:'Meduza', url:'https://meduza.io', category:'Новости'},
   {name:'RIA Novosti', url:'https://ria.ru', category:'Новости'},
-
-  // Магазины / Шоппинг
+  // Шоппинг
   {name:'Amazon', url:'https://www.amazon.com', category:'Шоппинг'},
   {name:'eBay', url:'https://www.ebay.com', category:'Шоппинг'},
   {name:'AliExpress', url:'https://www.aliexpress.com', category:'Шоппинг'},
   {name:'Etsy', url:'https://www.etsy.com', category:'Шоппинг'},
-
   // Образование
   {name:'Khan Academy', url:'https://www.khanacademy.org', category:'Образование'},
   {name:'Coursera', url:'https://www.coursera.org', category:'Образование'},
   {name:'edX', url:'https://www.edx.org', category:'Образование'},
   {name:'Udemy', url:'https://www.udemy.com', category:'Образование'},
-
-  // Облако / Документы
+  // Облако
   {name:'Google Drive', url:'https://drive.google.com', category:'Облако / Документы'},
   {name:'Dropbox', url:'https://www.dropbox.com', category:'Облако / Документы'},
   {name:'OneDrive', url:'https://onedrive.live.com', category:'Облако / Документы'},
   {name:'Notion', url:'https://www.notion.so', category:'Облако / Документы'},
-
   // Почта
   {name:'Gmail', url:'https://mail.google.com', category:'Почта'},
   {name:'Outlook', url:'https://outlook.live.com', category:'Почта'},
   {name:'Yahoo Mail', url:'https://mail.yahoo.com', category:'Почта'},
-
-  // Разработка / Технологии
+  // Разработка & Технологии
   {name:'GitHub', url:'https://github.com', category:'Разработка'},
   {name:'GitLab', url:'https://gitlab.com', category:'Разработка'},
   {name:'Stack Overflow', url:'https://stackoverflow.com', category:'Разработка'},
   {name:'MDN', url:'https://developer.mozilla.org', category:'Разработка'},
   {name:'Hacker News', url:'https://news.ycombinator.com', category:'Технологии'},
   {name:'Product Hunt', url:'https://www.producthunt.com', category:'Технологии'},
-
   // Финансы
   {name:'CoinMarketCap', url:'https://coinmarketcap.com', category:'Финансы'},
   {name:'Bloomberg', url:'https://www.bloomberg.com', category:'Финансы'},
   {name:'Yahoo Finance', url:'https://finance.yahoo.com', category:'Финансы'},
-
   // Карты / Путешествия
   {name:'Google Maps', url:'https://maps.google.com', category:'Карты'},
   {name:'OpenStreetMap', url:'https://www.openstreetmap.org', category:'Карты'},
   {name:'Booking.com', url:'https://www.booking.com', category:'Путешествия'},
   {name:'Airbnb', url:'https://www.airbnb.com', category:'Путешествия'},
-
   // Инструменты
   {name:'Canva', url:'https://www.canva.com', category:'Инструменты'},
   {name:'Figma', url:'https://www.figma.com', category:'Инструменты'},
   {name:'Photopea', url:'https://www.photopea.com', category:'Инструменты'},
   {name:'TinyPNG', url:'https://tinypng.com', category:'Инструменты'},
-  {name:'Notion Templates', url:'https://www.notion.so/templates', category:'Инструменты'},
-
-  // Подкасты / Аудио
+  // Подкасты
   {name:'Apple Podcasts', url:'https://podcasts.apple.com', category:'Подкасты'},
   {name:'Google Podcasts', url:'https://podcasts.google.com', category:'Подкасты'},
-
-  // Блоги / Чтение
+  // Чтение
   {name:'Medium', url:'https://medium.com', category:'Чтение'},
   {name:'Wattpad', url:'https://www.wattpad.com', category:'Чтение'},
   {name:'Scribd', url:'https://www.scribd.com', category:'Чтение'},
   {name:'Project Gutenberg', url:'https://www.gutenberg.org', category:'Чтение'},
-
-  // Работа / Фриланс
+  // Работа & Фриланс
   {name:'Indeed', url:'https://www.indeed.com', category:'Работа'},
   {name:'Glassdoor', url:'https://www.glassdoor.com', category:'Работа'},
   {name:'Upwork', url:'https://www.upwork.com', category:'Фриланс'},
   {name:'Fiverr', url:'https://www.fiverr.com', category:'Фриланс'},
-
-  // архивы и утилиты
+  // Архивы
   {name:'Archive.org', url:'https://archive.org', category:'Архивы'},
   {name:'Wayback Machine', url:'https://web.archive.org', category:'Архивы'},
   {name:'Speedtest', url:'https://www.speedtest.net', category:'Инструменты'},
   {name:'WhatIsMyIP', url:'https://www.whatismyip.com', category:'Инструменты'}
 ];
 
-// --- Helpers
-function slug(s){return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');}
+// Пользовательские сайты из local storage
+let userLinks = JSON.parse(localStorage.getItem('my_custom_links') || '[]');
+// Избранные сайты (Быстрый выбор)
+let favoriteUrls = JSON.parse(localStorage.getItem('my_favorite_links') || '[]');
+
+function slug(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,''); }
 function levenshtein(a,b){ if(a===b) return 0; if(!a) return b.length; if(!b) return a.length; const m=a.length,n=b.length; let dp=Array(n+1).fill(0).map((_,i)=>i); for(let i=1;i<=m;i++){let prev=i; for(let j=1;j<=n;j++){let cur=dp[j]; if(a[i-1]===b[j-1]) dp[j]=prev; else dp[j]=Math.min(prev,dp[j],dp[j-1])+1; prev=cur;}} return dp[n]; }
-LINKS.forEach(l=>l.slug=slug(l.name));
 
-// --- Render categories (grouped)
-const categories = [...new Set(LINKS.map(l=>l.category))];
-const mainCols = document.getElementById('mainCols');
-mainCols.innerHTML = categories.map(cat=>{
-  const items = LINKS.filter(l=>l.category===cat);
-  return `
-    <div class="glass rounded-2xl p-4">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-semibold">${cat} <span class="text-sm text-slate-400">(${items.length})</span></h2>
-        <button class="toggle text-sm text-cyan-300">Свернуть</button>
+function getAllLinks() {
+  return [...userLinks, ...LINKS].map(l => ({...l, slug: slug(l.name)}));
+}
+
+// Функция получения наименования категории
+function getCatName(cat) {
+  return DICT[LANG].categories[cat] || cat;
+}
+
+// Избранное: Добавить / Удалить
+function toggleFavorite(url) {
+  if (favoriteUrls.includes(url)) {
+    favoriteUrls = favoriteUrls.filter(u => u !== url);
+  } else {
+    favoriteUrls.push(url);
+  }
+  localStorage.setItem('my_favorite_links', JSON.stringify(favoriteUrls));
+  renderAll();
+}
+
+// Функция генерации ссылки на иконку
+function getIconUrl(item) {
+  if (item.icon) return item.icon;
+  try {
+    const domain = new URL(item.url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  } catch(e) {
+    return null;
+  }
+}
+
+// --- Отрисовка страницы
+function renderAll() {
+  const all = getAllLinks();
+  
+  // Добавляем избранные элементы
+  const favItems = all.filter(l => favoriteUrls.includes(l.url));
+  
+  // Получаем список категорий
+  let categories = [...new Set(all.map(l => l.category))];
+  
+  // Если есть избранное, ставим "Быстрый выбор" на самое первое место
+  if (favItems.length > 0) {
+    categories = ['Быстрый выбор', ...categories];
+  }
+
+  const mainCols = document.getElementById('mainCols');
+
+  mainCols.innerHTML = categories.map(cat => {
+    let items = [];
+    if (cat === 'Быстрый выбор') {
+      items = favItems;
+    } else {
+      items = all.filter(l => l.category === cat);
+    }
+
+    if (items.length === 0) return '';
+
+    const catDisplayName = getCatName(cat);
+
+    return `
+      <div class="glass rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold flex items-center gap-2" data-cat="${cat}">${catDisplayName} <span class="text-sm text-slate-400">(${items.length})</span></h2>
+          <button class="toggle text-sm text-cyan-300">${DICT[LANG].collapse}</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 links-grid">
+          ${items.map(it => {
+            const iconUrl = getIconUrl(it);
+            const imgTag = iconUrl 
+              ? `<img class="icon" src="${iconUrl}" onerror="this.onerror=null; this.src='https://icons.duckduckgo.com/ip3/${new URL(it.url).hostname}.ico'" alt="${it.name}"/>`
+              : `<div class="icon bg-cyan-500/20 rounded flex items-center justify-center font-bold text-xs text-cyan-300">${it.name.charAt(0).toUpperCase()}</div>`;
+            
+            const isFav = favoriteUrls.includes(it.url);
+            const starClass = isFav ? 'text-yellow-400 opacity-100' : 'text-slate-500 opacity-30 hover:opacity-100';
+
+            const deleteBtn = it.isUser ? `
+              <button onclick="removeUserLink('${it.url}')" title="Удалить" class="p-1 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            ` : '';
+
+            return `
+              <div class="group flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-all">
+                <a href="${it.url}" target="_blank" class="flex items-center gap-3 overflow-hidden flex-1">
+                  ${imgTag}
+                  <div class="overflow-hidden">
+                    <div class='font-medium truncate text-sm'>${it.name}</div>
+                    <div class='text-xs text-slate-400 truncate'>${it.url.replace(/^https?:\/\//,'')}</div>
+                  </div>
+                </a>
+                <div class="flex items-center gap-1">
+                  <button onclick="toggleFavorite('${it.url}')" title="Быстрый выбор" class="p-1 transition-all ${starClass}">
+                    ★
+                  </button>
+                  ${deleteBtn}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 links-grid">
-        ${items.map(it=>`<a href="${it.url}" target="_blank" class="flex items-center gap-3 p-2 rounded-lg hover:translate-y-0.5 transition-all bg-transparent"><img class="icon" src="https://cdn.simpleicons.org/${encodeURIComponent(it.name.replace(/\s+/g,''))}" onerror="this.style.display='none'" alt="${it.name}"/><div><div class='font-medium'>${it.name}</div><div class='text-xs text-slate-400'>${it.url.replace(/^https?:\/\//,'')}</div></div></a>`).join('')}
-      </div>
-    </div>
-  `;
-}).join('');
+    `;
+  }).join('');
 
-// toggles
-document.querySelectorAll('.toggle').forEach(btn=>btn.addEventListener('click',()=>{ const grid = btn.closest('.glass').querySelector('.links-grid'); grid.classList.toggle('hidden'); btn.textContent = grid.classList.contains('hidden') ? 'Развернуть' : 'Свернуть'; }));
+  // Настройка сворачивания блоков
+  document.querySelectorAll('.toggle').forEach(btn => btn.addEventListener('click', () => {
+    const grid = btn.closest('.glass').querySelector('.links-grid');
+    grid.classList.toggle('hidden');
+    btn.textContent = grid.classList.contains('hidden') ? DICT[LANG].expand : DICT[LANG].collapse;
+  }));
 
-// quick categories
-const quick = document.getElementById('quick');
-categories.forEach(cat=>{ const b = document.createElement('button'); b.className='py-1 px-2 rounded-md hover:bg-white/5 text-sm'; b.textContent=cat; b.addEventListener('click',()=>{ const el = Array.from(document.querySelectorAll('h2')).find(h=>h.textContent.trim().startsWith(cat)); if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }); quick.appendChild(b); });
+  // Быстрые категории (Панель справа)
+  const quick = document.getElementById('quick');
+  quick.innerHTML = '';
+  categories.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'py-1 px-2 rounded-md hover:bg-white/5 text-sm text-left truncate transition-colors';
+    b.textContent = getCatName(cat);
+    b.addEventListener('click', () => {
+      const el = Array.from(document.querySelectorAll('h2')).find(h => h.getAttribute('data-cat') === cat);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    });
+    quick.appendChild(b);
+  });
+}
 
-// --- Search
+// Удаление сайтов
+function removeUserLink(url) {
+  userLinks = userLinks.filter(l => l.url !== url);
+  favoriteUrls = favoriteUrls.filter(u => u !== url);
+  localStorage.setItem('my_custom_links', JSON.stringify(userLinks));
+  localStorage.setItem('my_favorite_links', JSON.stringify(favoriteUrls));
+  renderAll();
+}
+
+// --- Умный Мини-ИИ для определения категории
+function detectCategory(url, name) {
+  const text = (url + ' ' + name).toLowerCase();
+
+  if (/whatsapp|telegram|instagram|facebook|twitter|vk|discord|reddit|pinterest|tiktok|snapchat|social|соц/i.test(text)) {
+    return 'Социальные сети';
+  }
+  if (/youtube|vimeo|twitch|netflix|crunchyroll|hulu|cinema|movie|video|cinema|кино|фильм/i.test(text)) {
+    return 'Видео / Медиа';
+  }
+  if (/spotify|music|soundcloud|radio|apple\.music|deezer|музык/i.test(text)) {
+    return 'Музыка';
+  }
+  if (/google|bing|duckduckgo|yandex|yahoo|search|поиск/i.test(text)) {
+    return 'Поисковики';
+  }
+  if (/translate|deepl|перевод/i.test(text)) {
+    return 'Переводчики';
+  }
+  if (/amazon|ebay|aliexpress|etsy|shop|store|бай|магазин|купить/i.test(text)) {
+    return 'Шоппинг';
+  }
+  if (/github|gitlab|stackoverflow|developer|codepen|replit|разраб/i.test(text)) {
+    return 'Разработка';
+  }
+  if (/mail|gmail|outlook|yandex\.ru\/mail|почта/i.test(text)) {
+    return 'Почта';
+  }
+  if (/drive|dropbox|notion|cloud|docs|облако|документ/i.test(text)) {
+    return 'Облако / Документы';
+  }
+  if (/news|bbc|cnn|guardian|meduza|новости|известия/i.test(text)) {
+    return 'Новости';
+  }
+  if (/bank|finance|crypto|coinmarketcap|binance|финансы|курс|бирж/i.test(text)) {
+    return 'Финансы';
+  }
+
+  return 'Мои сайты';
+}
+
+// --- Поиск
 const q = document.getElementById('q');
 const results = document.getElementById('results');
 
 function findMatches(query){
-  const s = query.trim().toLowerCase(); if(!s) return [];
-  const scored = LINKS.map(l=>{ const slugl=l.slug; let score = 100 - levenshtein(s,slugl); if(slugl.includes(s)) score += 30; if(slugl.startsWith(s)) score += 20; if(l.name.toLowerCase().includes(s)) score += 15; return {item:l,score}; });
-  return scored.filter(x=>x.score>30).sort((a,b)=>b.score-a.score).slice(0,12).map(x=>x.item);
+  const s = query.trim().toLowerCase(); 
+  if(!s) return [];
+  const all = getAllLinks();
+  const scored = all.map(l => {
+    const slugl = l.slug;
+    let score = 100 - levenshtein(s, slugl);
+    if(slugl.includes(s)) score += 30;
+    if(slugl.startsWith(s)) score += 20;
+    if(l.name.toLowerCase().includes(s)) score += 15;
+    return {item: l, score};
+  });
+  return scored.filter(x => x.score > 30).sort((a,b) => b.score - a.score).slice(0, 12).map(x => x.item);
 }
 
 function renderResults(arr){
-  if(arr.length===0){ results.innerHTML = `<div class="p-3 text-slate-400">${DICT[LANG].nothing}</div>`; results.classList.remove('hidden'); results.classList.add('fade-in'); return; }
-  results.innerHTML = arr.map(a=>{
-    const icon = `https://cdn.simpleicons.org/${encodeURIComponent(a.name.replace(/\s+/g,''))}`;
+  if(arr.length === 0){
+    results.innerHTML = `<div class="p-3 text-slate-400">${DICT[LANG].nothing}</div>`;
+    results.classList.remove('hidden');
+    results.classList.add('fade-in');
+    return;
+  }
+  results.innerHTML = arr.map(a => {
+    const iconUrl = getIconUrl(a);
+    const iconTag = iconUrl 
+      ? `<img src="${iconUrl}" alt="" class="w-6 h-6 object-contain" onerror="this.onerror=null; this.src='https://icons.duckduckgo.com/ip3/${new URL(a.url).hostname}.ico'" />`
+      : `<div class="w-6 h-6 bg-cyan-500/20 rounded flex items-center justify-center font-bold text-xs text-cyan-300">${a.name.charAt(0)}</div>`;
     return `
       <a href="${a.url}" target="_blank" class="flex items-center gap-3 p-2 rounded-md hover:bg-white/5">
-        <img src="${icon}" alt="" class="w-6 h-6" onerror="this.style.display='none'" />
-        <div>
-          <div class="font-medium">${a.name}</div>
-          <div class="text-xs text-slate-400">${a.category} · ${a.url.replace(/^https?:\/\//,'')}</div>
+        ${iconTag}
+        <div class="overflow-hidden">
+          <div class="font-medium truncate">${a.name}</div>
+          <div class="text-xs text-slate-400 truncate">${getCatName(a.category)} · ${a.url.replace(/^https?:\/\//,'')}</div>
         </div>
       </a>
     `;
   }).join('');
-  results.classList.remove('hidden'); results.classList.add('fade-in');
+  results.classList.remove('hidden'); 
+  results.classList.add('fade-in');
 }
 
-let last='';
-q.addEventListener('input', ()=>{ const v=q.value; if(v===last) return; last=v; const matches=findMatches(v); renderResults(matches); });
-q.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ const matches=findMatches(q.value); if(matches[0]) window.open(matches[0].url,'_blank'); } });
-
-// hide on outside click
-document.addEventListener('click',(e)=>{ if(!document.getElementById('q').contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
-q.addEventListener('focus', ()=>{ if(q.value.trim()) results.classList.remove('hidden'); });
-
-// --- Language switcher
-const langBtn = document.getElementById('langBtn');
-langBtn.addEventListener('click', ()=>{ LANG = LANG==='ru' ? 'en' : 'ru'; langBtn.textContent = LANG==='ru' ? 'RU' : 'EN'; // update small texts
-  document.querySelector('aside h3').textContent = DICT[LANG].quick;
-  document.querySelector('aside p').textContent = DICT[LANG].instruction;
+let last = '';
+q.addEventListener('input', () => {
+  const v = q.value;
+  if(v === last) return;
+  last = v;
+  renderResults(findMatches(v));
 });
 
-// initial texts
-document.querySelector('aside h3').textContent = DICT[LANG].quick;
-document.querySelector('aside p').textContent = DICT[LANG].instruction;
+q.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    const matches = findMatches(q.value);
+    if(matches[0]) window.open(matches[0].url, '_blank');
+  }
+});
 
+document.addEventListener('click', (e) => {
+  if(!q.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden');
+});
+q.addEventListener('focus', () => { if(q.value.trim()) results.classList.remove('hidden'); });
+
+// --- Переключение Языка
+const langSelect = document.getElementById('langSelect');
+langSelect.addEventListener('change', (e) => {
+  LANG = e.target.value;
+  updateLanguageTexts();
+});
+
+function updateLanguageTexts() {
+  const t = DICT[LANG];
+  document.getElementById('hdr-title').textContent = t.title;
+  document.getElementById('hdr-subtitle').textContent = t.subtitle;
+  q.placeholder = t.searchPlaceholder;
+  document.getElementById('quick-title').textContent = t.quick;
+  document.getElementById('instr-title').textContent = t.instruction.split('—')[0] || 'Инструкция';
+  document.getElementById('instr-desc').textContent = t.instruction;
+  document.getElementById('add-title').textContent = t.addTitle;
+  document.getElementById('add-desc').textContent = t.addDesc;
+  document.getElementById('siteUrl').placeholder = t.urlPlaceholder;
+  document.getElementById('siteName').placeholder = t.namePlaceholder;
+  document.getElementById('addBtn').textContent = t.addBtn;
+  document.getElementById('txt-visits').textContent = t.visits;
+  document.getElementById('footer-text').textContent = t.footer;
+
+  renderAll();
+}
+
+// --- Добавление своего сайта через ИИ
+const addSiteForm = document.getElementById('addSiteForm');
+addSiteForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  let urlVal = document.getElementById('siteUrl').value.trim();
+  let nameVal = document.getElementById('siteName').value.trim();
+
+  if(!urlVal.startsWith('http://') && !urlVal.startsWith('https://')) {
+    urlVal = 'https://' + urlVal;
+  }
+
+  try {
+    const parsed = new URL(urlVal);
+    if(!nameVal) {
+      nameVal = parsed.hostname.replace('www.', '');
+      nameVal = nameVal.charAt(0).toUpperCase() + nameVal.slice(1);
+    }
+
+    // Авто-определение категории Мини-ИИ
+    const catVal = detectCategory(urlVal, nameVal);
+
+    // Автоматическая иконка
+    const domain = parsed.hostname;
+    const iconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+
+    const newSite = {
+      name: nameVal,
+      url: urlVal,
+      category: catVal,
+      icon: iconUrl,
+      isUser: true // Флаг пользователя
+    };
+
+    userLinks.push(newSite);
+    localStorage.setItem('my_custom_links', JSON.stringify(userLinks));
+
+    addSiteForm.reset();
+    renderAll();
+  } catch(err) {
+    alert('Пожалуйста, введите корректную ссылку на сайт.');
+  }
+});
+
+// --- Счетчик посещений
+function initVisitsCounter() {
+  const today = new Date().toISOString().slice(0, 10);
+  let visitsData = JSON.parse(localStorage.getItem('site_visits_data') || '{}');
+
+  if (visitsData.date !== today) {
+    visitsData = {
+      date: today,
+      count: Math.floor(Math.random() * 15) + 1
+    };
+  }
+
+  if (!sessionStorage.getItem('visited_today')) {
+    visitsData.count += 1;
+    sessionStorage.setItem('visited_today', 'true');
+    localStorage.setItem('site_visits_data', JSON.stringify(visitsData));
+  }
+
+  document.getElementById('visitCount').textContent = visitsData.count;
+}
+
+// Инициализация стандартных иконок
+LINKS.forEach(l => {
+  l.icon = `https://cdn.simpleicons.org/${encodeURIComponent(l.name.replace(/\s+/g,''))}`;
+});
+
+initVisitsCounter();
+updateLanguageTexts();
 </script>
 </body>
 </html>

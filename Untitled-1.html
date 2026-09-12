@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Облачная Флешка</title>
+    <!-- Подключаем библиотеку Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;
+            --text-color: #f8fafc;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h1 { margin-bottom: 24px; font-size: 24px; color: #60a5fa; }
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #2563eb; }
+        .btn-sec { background-color: #475569; }
+        .btn-sec:hover { background-color: #334155; }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            box-sizing: border-box;
+        }
+        .info-box {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+            border: 1px dashed var(--accent);
+        }
+        .hidden { display: none; }
+        .file-link { color: #60a5fa; word-break: break-all; display: block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💾 Облачная Флешка</h1>
+
+    <!-- ГЛАВНОЕ МЕНЮ -->
+    <div id="auth-screen">
+        <button class="btn" onclick="createNewFlashDrive()">✨ Создать новую флешку</button>
+        <div style="margin: 20px 0; color: #64748b;">— ИЛИ ВОЙТИ В СУЩЕСТВУЮЩУЮ —</div>
+        <input type="text" id="login-id" placeholder="ID флешки (например, 582931)">
+        <input type="password" id="login-password" placeholder="Пароль">
+        <button class="btn btn-sec" onclick="accessFlashDrive()">🔌 Подключить флешку</button>
+    </div>
+
+    <!-- ЭКРАН СОЗДАНИЯ -->
+    <div id="created-screen" class="hidden">
+        <h3>Флешка успешно создана!</h3>
+        <p>Запишите эти данные, чтобы не потерять доступ:</p>
+        <div class="info-box">
+            <p><strong>ID флешки:</strong> <span id="new-id" style="color: #60a5fa; font-size: 18px;"></span></p>
+            <p><strong>Пароль:</strong> <span id="new-password" style="color: #34d399; font-size: 18px;"></span></p>
+        </div>
+        <button class="btn" onclick="openCreatedDrive()">Войти на флешку</button>
+    </div>
+
+    <!-- ЭКРАН СОДЕРЖИМОГО ФЛЕШКИ -->
+    <div id="drive-screen" class="hidden">
+        <h2 id="drive-title">Флешка #</h2>
+        
+        <!-- Блок для заметок/текста -->
+        <textarea id="drive-text" rows="5" placeholder="Напишите тут что-нибудь (текст, ссылки)..."></textarea>
+        <button class="btn btn-sec" onclick="saveText()">💾 Сохранить текст</button>
+
+        <hr style="border-color: #334155; margin: 20px 0;">
+
+        <!-- Блок для файлов -->
+        <h3>Файлы на флешке</h3>
+        <input type="file" id="file-input">
+        <button class="btn" onclick="uploadFile()">📤 Загрузить файл</button>
+        
+        <div id="file-container">
+            <!-- Сюда будут выводиться загруженные файлы -->
+        </div>
+
+        <button class="btn btn-sec" style="margin-top: 30px; background: #991b1b;" onclick="exitDrive()">Выйти</button>
+    </div>
+</div>
+
+<script>
+    // === ВСТАВЬТЕ СВОИ ДАННЫЕ ИЗ SUPABASE СЮДА ===
+    const SUPABASE_URL = "ВАШ_SUPABASE_URL"; 
+    const SUPABASE_KEY = "ВАШ_SUPABASE_KEY";
+    // ============================================
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentDriveId = "";
+    let currentDrivePassword = "";
+
+    // Генерация случайных чисел (ID) и букв (пароль)
+    function generateId() { return Math.floor(100000 + Math.random() * 900000).toString(); }
+    function generatePassword() {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let pass = "";
+        for (let i = 0; i < 8; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return pass;
+    }
+
+    // Создание флешки в БД
+    async function createNewFlashDrive() {
+        const id = generateId();
+        const password = generatePassword();
+
+        const { error } = await supabase
+            .from('flash_drives')
+            .insert([{ id, password, content: '' }]);
+
+        if (error) {
+            alert("Ошибка при создании флешки, попробуйте еще раз.");
+            console.error(error);
+            return;
+        }
+
+        currentDriveId = id;
+        currentDrivePassword = password;
+
+        document.getElementById('new-id').innerText = id;
+        document.getElementById('new-password').innerText = password;
+
+        showScreen('created-screen');
+    }
+
+    // Вход на существующую флешку
+    async function accessFlashDrive() {
+        const id = document.getElementById('login-id').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+
+        const { data, error } = await supabase
+            .from('flash_drives')
+            .select('*')
+            .eq('id', id)
+            .eq('password', password)
+            .single();
+
+        if (error || !data) {
+            alert("Неверный ID или пароль!");
+            return;
+        }
+
+        currentDriveId = data.id;
+        currentDrivePassword = data.password;
+        
+        document.getElementById('drive-text').value = data.content || "";
+        showDriveScreen();
+    }
+
+    function openCreatedDrive() {
+        document.getElementById('drive-text').value = "";
+        showDriveScreen();
+    }
+
+    function showDriveScreen() {
+        document.getElementById('drive-title').innerText = `Флешка #${currentDriveId}`;
+        showScreen('drive-screen');
+        loadFilesList();
+    }
+
+    // Сохранение текста
+    async function saveText() {
+        const text = document.getElementById('drive-text').value;
+        const { error } = await supabase
+            .from('flash_drives')
+            .update({ content: text })
+            .eq('id', currentDriveId);
+
+        if (error) alert("Ошибка сохранения текста!");
+        else alert("Текст успешно сохранен!");
+    }
+
+    // Загрузка файла в облако Supabase Storage
+    async function uploadFile() {
+        const fileInput = document.getElementById('file-input');
+        if (fileInput.files.length === 0) {
+            alert("Выберите файл!");
+            return;
+        }
+        const file = fileInput.files[0];
+        // Формируем уникальный путь внутри бакета: "ID_флешки/имя_файла"
+        const filePath = `${currentDriveId}/${Date.now()}_${file.name}`;
+
+        const { data, error } = await supabase.storage
+            .from('files')
+            .upload(filePath, file);
+
+        if (error) {
+            alert("Ошибка при загрузке файла!");
+            console.error(error);
+            return;
+        }
+
+        // Получаем публичную ссылку на файл
+        const { data: urlData } = supabase.storage
+            .from('files')
+            .getPublicUrl(filePath);
+
+        // Сохраняем ссылку на файл в нашей таблице флешки
+        await supabase
+            .from('flash_drives')
+            .update({ file_url: urlData.publicUrl })
+            .eq('id', currentDriveId);
+
+        alert("Файл загружен!");
+        loadFilesList();
+    }
+
+    // Показ загруженных файлов
+    async function loadFilesList() {
+        const container = document.getElementById('file-container');
+        container.innerHTML = "Загрузка файлов...";
+
+        // Ищем все файлы в бакете внутри папки с ID нашей флешки
+        const { data, error } = await supabase.storage
+            .from('files')
+            .list(currentDriveId);
+
+        if (error || !data || data.length === 0) {
+            container.innerHTML = "<p style='color: #64748b;'>Файлов пока нет</p>";
+            return;
+        }
+
+        container.innerHTML = "";
+        data.forEach(file => {
+            const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/files/${currentDriveId}/${file.name}`;
+            
+            const fileElement = document.createElement('div');
+            fileElement.style.margin = "10px 0";
+            fileElement.innerHTML = `
+                <a href="${fileUrl}" target="_blank" class="file-link">📄 ${file.name}</a>
+            `;
+            container.appendChild(fileElement);
+        });
+    }
+
+    function exitDrive() {
+        currentDriveId = "";
+        currentDrivePassword = "";
+        document.getElementById('login-id').value = "";
+        document.getElementById('login-password').value = "";
+        showScreen('auth-screen');
+    }
+
+    // Переключение экранов
+    function showScreen(screenId) {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('created-screen').classList.add('hidden');
+        document.getElementById('drive-screen').classList.add('hidden');
+        document.getElementById(screenId).classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
+
+
+
